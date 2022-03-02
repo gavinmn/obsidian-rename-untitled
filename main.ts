@@ -1,7 +1,5 @@
 import { Editor, EditorPosition, MarkdownView, Plugin, Vault, Workspace, App, FileManager } from 'obsidian';
 
-
-
 function renameFile(editor: Editor, view: MarkdownView) {
 	const workspace = this.app.workspace;
 	const activeFile = workspace.getActiveFile()
@@ -31,7 +29,6 @@ function renameFile(editor: Editor, view: MarkdownView) {
 				editor.replaceRange(``, startRange, endRange);
 				continue
 			}
-
 			firstLine = lines[index].replace(/[^\w\s]/gi, '').trim()
 			break
 		}
@@ -43,9 +40,27 @@ function renameFile(editor: Editor, view: MarkdownView) {
 	}
 }
 
-
 export default class RenameUntitled extends Plugin {
 	async onload() {
+		
+		
+	// Source for running this command on save
+	// https://github.com/hipstersmoothie/obsidian-plugin-prettier/blob/main/src/main.ts
+  		const saveCommandDefinition = (this.app as any).commands?.commands?.[
+			'editor:save-file'
+  		];
+  		const save = saveCommandDefinition?.callback;
+		
+  		if (typeof save === 'function') {
+			saveCommandDefinition.callback = () => {
+				const view = this.app.workspace.getActiveViewOfType(MarkdownView)
+				const editor = view.editor;
+				const file = this.app.workspace.getActiveFile();
+				renameFile(editor, view)
+			};
+  		}
+		
+		
 		this.addCommand({
 			id: 'rename-untitled',
 			name: 'Rename untitled document',
