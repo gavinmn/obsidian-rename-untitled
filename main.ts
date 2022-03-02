@@ -7,10 +7,26 @@ export default class RenameUntitled extends Plugin {
 			name: 'Rename untitled document',
 			editorCallback: (editor: Editor, view: MarkdownView) => {
 				const workspace = this.app.workspace;
-				const fileTitle = workspace.getActiveFile().basename
+				const activeFile = workspace.getActiveFile()
+
+				const filePath = activeFile.path
+				const fileTitle = activeFile.basename
+				const fileType = activeFile.extension
+				const directory = filePath.replace(fileTitle + '.' + fileType, '')
+				
+				const fileText = editor.getValue()
+				const lines = fileText.split('\n');
+				
+				let firstLine = "Untitled"
+				for(var index in lines) {
+					if (lines[index].length != 0) {
+						firstLine = lines[index]
+						break
+					}
+				}
 				
 				if (fileTitle == "Untitled") {
-					this.app.fileManager.renameFile(workspace.getActiveFile(), "test.md")
+					this.app.fileManager.renameFile(activeFile, `${directory}${firstLine}.${fileType}`)
 				} else {
 					return
 				}
